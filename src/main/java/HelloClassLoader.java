@@ -1,18 +1,34 @@
-import java.util.Base64;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.file.Files;
 
 public class HelloClassLoader extends ClassLoader{
     public static void main(String[] args) throws Exception{
-        new HelloClassLoader().findClass("jvm.Hello").newInstance();
+        Class<?> helloClass = new HelloClassLoader().findClass("Hello");
+        Object helloObj = helloClass.newInstance();
+        Method helloMethod = helloClass.getMethod("hello");
+        helloMethod.invoke(helloObj);
     }
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        String helloBase64 = "yv66vgAAADsAHAoAAgADBwAEDAAFAAYBABBqYXZhL2xhbmcvT2JqZWN0AQAGPGluaXQ+AQADKClWCQAIAAkHAAoMAAsADAEAEGphdmEvbGFuZy9TeXN0ZW0BAANvdXQBABVMamF2YS9pby9QcmludFN0cmVhbTsIAA4BAAtoZWxsbyB3b3JsZAoAEAARBwASDAATABQBABNqYXZhL2lvL1ByaW50U3RyZWFtAQAHcHJpbnRsbgEAFShMamF2YS9sYW5nL1N0cmluZzspVgcAFgEACWp2bS9IZWxsbwEABENvZGUBAA9MaW5lTnVtYmVyVGFibGUBAAg8Y2xpbml0PgEAClNvdXJjZUZpbGUBAApIZWxsby5qYXZhACEAFQACAAAAAAACAAEABQAGAAEAFwAAAB0AAQABAAAABSq3AAGxAAAAAQAYAAAABgABAAAAAgAIABkABgABABcAAAAlAAIAAAAAAAmyAAcSDbYAD7EAAAABABgAAAAKAAIAAAAEAAgABQABABoAAAACABs=";
-        byte[] bytes = decode(helloBase64);
-        return defineClass(name, bytes, 0, bytes.length);
-    }
-
-    public byte[] decode(String base64) {
-        return Base64.getDecoder().decode(base64);
+        String fileName = "Hello.xlass";
+        StringBuilder build = new StringBuilder();
+        byte[] decodedBytes = new byte[1];
+        try {
+            ClassLoader classLoader = HelloClassLoader.class.getClassLoader();
+            File file = new File(classLoader.getResource(fileName).getFile());
+            byte[] bytes = Files.readAllBytes(file.toPath());
+            decodedBytes = new byte[bytes.length];
+            for (int i = 0; i < bytes.length; i++) {
+                byte b = bytes[i];
+                byte decodedByte = (byte)(255 - b);
+                decodedBytes[i] = decodedByte;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return defineClass(name, decodedBytes, 0, decodedBytes.length);
     }
 }
