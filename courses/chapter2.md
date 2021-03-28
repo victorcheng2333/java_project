@@ -36,3 +36,5 @@ XX:MaxGCPauseMillis=value
 
 堆内存划分为一个个的 Region, 默认2048 个。Region 之间是复制算法，整体上可以看做标记-整理算法，可以有效避免内存碎片，当Java堆非常大的时候，G1的优势明显
 
+### 对比图
+![gc.png](https://github.com/victorcheng2333/java_project/blob/master/images/gc.png)
