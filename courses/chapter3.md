@@ -1,37 +1,5 @@
-package io.github.kimmking.gateway.outbound.httpclient4;
-
-
-import io.github.kimmking.gateway.filter.HeaderHttpResponseFilter;
-import io.github.kimmking.gateway.filter.HttpRequestFilter;
-import io.github.kimmking.gateway.filter.HttpResponseFilter;
-import io.github.kimmking.gateway.router.HttpEndpointRouter;
-import io.github.kimmking.gateway.router.RandomHttpEndpointRouter;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpUtil;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.concurrent.FutureCallback;
-import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
-import org.apache.http.impl.nio.client.HttpAsyncClients;
-import org.apache.http.impl.nio.reactor.IOReactorConfig;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.*;
-import java.util.logging.Filter;
-import java.util.stream.Collectors;
-
-import static io.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
+### 1、整合你上次作业的 httpclient
+```java
 public class HttpOutboundHandler {
     
     private CloseableHttpAsyncClient httpclient;
@@ -114,17 +82,13 @@ public class HttpOutboundHandler {
         FullHttpResponse response = null;
         try {
             byte[] body = EntityUtils.toByteArray(endpointResponse.getEntity());
+    
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(body));
 
             response.headers().set("Content-Type", "application/json");
             response.headers().setInt("Content-Length", Integer.parseInt(endpointResponse.getFirstHeader("Content-Length").getValue()));
 
             filter.filter(response);
-
-//            for (Header e : endpointResponse.getAllHeaders()) {
-//                //response.headers().set(e.getName(),e.getValue());
-//                System.out.println(e.getName() + " => " + e.getValue());
-//            } 
         
         } catch (Exception e) {
             e.printStackTrace();
@@ -152,3 +116,16 @@ public class HttpOutboundHandler {
     
     
 }
+```
+
+### 2、实现过滤器
+示例：过滤器中添加 trace_id，用于全链路请求追踪
+```java
+public class HeaderHttpRequestFilter implements HttpRequestFilter {
+    @Override
+    public void filter(FullHttpRequest fullRequest, ChannelHandlerContext ctx) {
+        String traceId = UUID.randomUUID().toString();
+        fullRequest.headers().set("trace_id", traceId);
+    }
+}
+```
