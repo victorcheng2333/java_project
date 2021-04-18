@@ -13,8 +13,6 @@ import org.springframework.context.annotation.Configuration;
 // 这个注解可以提供一种方便的方式来将带有@ConfigurationProperties注解的类注入为Spring容器的Bean。
 @EnableConfigurationProperties(HelloProperties.class)//开启属性注入,通过@autowired注入
 @ConditionalOnClass(Hello.class)//判断这个类是否在classpath中存在，如果存在，才会实例化一个Bean
-// The Hello bean will be created if the hello.enable property exists and has a value other than false
-// or the property doesn't exist at all.
 @ConditionalOnProperty(prefix="hello", value="enabled", matchIfMissing = true)
 public class HelloAutoConfiguration {
 
